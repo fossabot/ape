@@ -85,7 +85,7 @@ def main():
     print("[+] Re-Createing CVE_CPE correlations")
     migrate_cve_cpe()
     print("[+] Done!")
-
+    
 
 if __name__ == '__main__':
     #main()
