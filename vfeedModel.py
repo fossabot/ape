@@ -65,7 +65,7 @@ class CweCapec(BaseModel):
 class CweCategory(BaseModel):
     categoryid = TextField(null=True)  # name
     categorytitle = TextField(null=True)  # name
-    cweid = ForeignKeyField(db_column='cweid', rel_model=CweDb, to_field='cweid')
+    cweid = TextField(null=True)
 
     class Meta:
         db_table = 'cwe_category'

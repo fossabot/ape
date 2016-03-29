@@ -40,18 +40,6 @@ def drop_nvd_db():
 # Query object with peewee
 
 # Bulk inserts - Drop collection before doing this!
-def migrate_cve_cpe():
-    Query_cve_cpe = CveCpe.select(CveCpe.cpeid, CveCpe.cveid).join(NvdDb).where(NvdDb.cveid==CveCpe.cveid)
-    for q_cve_cpe in Query_cve_cpe:
-        # Construct fields
-        cve_cpe_post = {}
-        cve_cpe_post['cpeid'] = str(q_cve_cpe.cpeid)
-        cve_cpe_post['cveid'] = str(q_cve_cpe.cveid.cveid)
-        # Verify before insert
-        if cve_cpe.find_one(cve_cpe_post) is None:
-            cve_cpe.insert_one(cve_cpe_post)
-        del cve_cpe_post
-
 def migrate_nvd_db():
     Query_nvd_db = NvdDb.select()
     for q_nvd_db in Query_nvd_db:
@@ -74,6 +62,19 @@ def migrate_nvd_db():
         if nvd_db.find_one(nvd_db_post) is None:
             nvd_db.insert_one(nvd_db_post)
         del nvd_db_post
+
+def migrate_cve_cpe():
+    Query_cve_cpe = CveCpe.select(CveCpe.cpeid, CveCpe.cveid).join(NvdDb).where(NvdDb.cveid==CveCpe.cveid)
+    for q_cve_cpe in Query_cve_cpe:
+        # Construct fields
+        cve_cpe_post = {}
+        cve_cpe_post['cpeid'] = str(q_cve_cpe.cpeid)
+        cve_cpe_post['cveid'] = str(q_cve_cpe.cveid.cveid)
+        # Verify before insert
+        if cve_cpe.find_one(cve_cpe_post) is None:
+            cve_cpe.insert_one(cve_cpe_post)
+        del cve_cpe_post
+
 
 def migrate_cve_cwe():
     Query_cve_cwe = CveCwe.select(
@@ -112,18 +113,33 @@ def migrate_cwe_db():
                                     CweDb.cweid,
                                     CweDb.cwetitle
                                 )
-    for q_cve_ref in Query_cwe_db:
+    for q_cwe_ref in Query_cwe_db:
         # Construct fields
         cwe_db_post = {}
-        cwe_db_post['cweid'] = str(q_cve_ref.cveid.cveid)
-        cwe_db_post['cwetitle'] = str(q_cve_ref.refname)
+        cwe_db_post['cweid'] = str(q_cwe_ref.cweid)
+        cwe_db_post['cwetitle'] = str(q_cwe_ref.cwetitle)
         # Verify before insert
-        print(cwe_db_post)
-        '''
         if cwe_db.find_one(cwe_db_post) is None:
             cwe_db.insert_one(cwe_db_post)
         del cwe_db_post
-        '''
+
+def migrate_cwe_category():
+    Query_cwe_category = CweCategory.select(
+                                                CweCategory.categoryid,
+                                                CweCategory.categorytitle,
+                                                CweCategory.cweid
+                                            )
+    for q_cwe_cat in Query_cwe_category:
+        # Construct fields
+        cwe_cat_post = {}
+        cwe_cat_post['cweid'] = str(q_cwe_cat.cweid)
+        cwe_cat_post['categoryid'] = str(q_cwe_cat.categoryid)
+        cwe_cat_post['categorytitle'] = str(q_cwe_cat.categorytitle)
+        # Verify before insert
+        if cwe_db.find_one(cwe_cat_post) is None:
+            cwe_db.insert_one(cwe_cat_post)
+        del cwe_cat_post
+
 
 # Call this function to start database migrations
 def main():
@@ -151,6 +167,11 @@ def main():
     cwe_db.drop()
     print("[+] Re-Createing CWE Data")
     migrate_cwe_db()
+    print("[+] Done")
+    print("[+] Dropping CWE Categories!")
+    cwe_category.drop()
+    print("[+] Re-Createing CWE Categories")
+    migrate_cwe_category()
     print("[+] Done")
 
 if __name__ == '__main__':
