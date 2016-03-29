@@ -76,7 +76,10 @@ def migrate_nvd_db():
         del nvd_db_post
 
 def migrate_cve_cwe():
-    Query_cve_cwe = CveCwe.select(CveCwe.cweid, CveCwe.cveid).join(NvdDb).where(NvdDb.cveid==CveCwe.cveid)
+    Query_cve_cwe = CveCwe.select(
+                                    CveCwe.cweid,
+                                    CveCwe.cveid
+                                ).join(NvdDb).where(NvdDb.cveid==CveCwe.cveid)
     for q_cve_cpe in Query_cve_cwe:
         # Construct fields
         cve_cwe_post = {}
@@ -87,20 +90,68 @@ def migrate_cve_cwe():
             cve_cwe.insert_one(cve_cwe_post)
         del cve_cwe_post
 
+def migrate_cve_ref():
+    Query_cve_ref = CveReference.select(
+                                        CveReference.cveid,
+                                        CveReference.refname,
+                                        CveReference.refsource
+                                        ).join(NvdDb).where(NvdDb.cveid==CveReference.cveid)
+    for q_cve_ref in Query_cve_ref:
+        # Construct fields
+        cve_ref_post = {}
+        cve_ref_post['cveid'] = str(q_cve_ref.cveid.cveid)
+        cve_ref_post['refname'] = str(q_cve_ref.refname)
+        cve_ref_post['refsource'] = str(q_cve_ref.refsource)
+        # Verify before insert
+        if cve_ref.find_one(cve_ref_post) is None:
+            cve_ref.insert_one(cve_ref_post)
+        del cve_ref_post
+
+def migrate_cwe_db():
+    Query_cwe_db = CweDb.select(
+                                    CweDb.cweid,
+                                    CweDb.cwetitle
+                                )
+    for q_cve_ref in Query_cwe_db:
+        # Construct fields
+        cwe_db_post = {}
+        cwe_db_post['cweid'] = str(q_cve_ref.cveid.cveid)
+        cwe_db_post['cwetitle'] = str(q_cve_ref.refname)
+        # Verify before insert
+        print(cwe_db_post)
+        '''
+        if cwe_db.find_one(cwe_db_post) is None:
+            cwe_db.insert_one(cwe_db_post)
+        del cwe_db_post
+        '''
+
 # Call this function to start database migrations
 def main():
-    print("[+] Dropping CVE_CPE correaltions! :-\\")
-    cve_cpe.drop()
     print("[+] Dropping NVD CVE data")
     nvd_db.drop()
     print("[+] Re-Creating NVD CVE Data")
     migrate_nvd_db()
     print("[+] Done!")
+    print("[+] Dropping CVE_CPE correaltions! :-\\")
+    cve_cpe.drop()
     print("[+] Re-Createing CVE_CPE correlations")
     migrate_cve_cpe()
     print("[+] Done!")
+    print("[+] Dropping CVE_CWE correaltions!")
+    cve_cwe.drop()
     print("[+] Re-Createing CVE_CWE correlations")
     migrate_cve_cwe()
     print("[+] Done")
+    print("[+] Dropping CVE References!")
+    cve_ref.drop()
+    print("[+] Re-Createing CVE References")
+    migrate_cve_ref()
+    print("[+] Done")
+    print("[+] Dropping CWE Data!")
+    cwe_db.drop()
+    print("[+] Re-Createing CWE Data")
+    migrate_cwe_db()
+    print("[+] Done")
+
 if __name__ == '__main__':
     main()
