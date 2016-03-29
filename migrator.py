@@ -70,8 +70,15 @@ def migrate_nvd_db():
         nvd_db.insert_one(nvd_db_post)
         del nvd_db_post
 
-def migrate_cve_cwe()
-    Query_nvd_db = NvdDb.select()
+def migrate_cve_cwe():
+    Query_cve_cwe = CveCwe.select(CveCwe.cweid, CveCwe.cveid).join(NvdDb).where(NvdDb.cveid==CveCwe.cveid)
+    for q_cve_cpe in Query_cve_cwe:
+        #print(q_cve_cpe.cpeid, q_cve_cpe.cveid.cveid)
+        cve_cwe_post = {}
+        cve_cwe_post['cveid'] = str(q_cve_cpe.cveid.cveid)
+        cve_cwe_post['cweid'] = str(q_cve_cpe.cweid)
+        cve_cwe.insert_one(cve_cwe_post)
+        del cve_cwe_post
 
 
 def main():
@@ -85,7 +92,9 @@ def main():
     print("[+] Re-Createing CVE_CPE correlations")
     migrate_cve_cpe()
     print("[+] Done!")
-    
+    print("[+] Re-Createing CVE_CWE correlations")
+    migrate_cve_cwe()
+    print("[+] Done")
 
 if __name__ == '__main__':
-    #main()
+    main()
