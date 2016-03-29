@@ -136,13 +136,14 @@ def migrate_cwe_category():
         cwe_cat_post['categoryid'] = str(q_cwe_cat.categoryid)
         cwe_cat_post['categorytitle'] = str(q_cwe_cat.categorytitle)
         # Verify before insert
-        if cwe_db.find_one(cwe_cat_post) is None:
-            cwe_db.insert_one(cwe_cat_post)
+        if cwe_category.find_one(cwe_cat_post) is None:
+            cwe_category.insert_one(cwe_cat_post)
         del cwe_cat_post
 
 
 # Call this function to start database migrations
 def main():
+    '''
     print("[+] Dropping NVD CVE data")
     nvd_db.drop()
     print("[+] Re-Creating NVD CVE Data")
@@ -168,6 +169,7 @@ def main():
     print("[+] Re-Createing CWE Data")
     migrate_cwe_db()
     print("[+] Done")
+    '''
     print("[+] Dropping CWE Categories!")
     cwe_category.drop()
     print("[+] Re-Createing CWE Categories")
