@@ -140,6 +140,20 @@ def migrate_cwe_category():
             cwe_category.insert_one(cwe_cat_post)
         del cwe_cat_post
 
+def migrate_cwe_capec():
+    Query_cwe_capec = CweCapec.select(
+                                                CweCapec.capecid,
+                                                CweCapec.cweid
+                                            )
+    for q_cwe_cap in Query_cwe_capec:
+        # Construct fields
+        cwe_cap_post = {}
+        cwe_cap_post['cweid'] = str(q_cwe_cap.cweid)
+        cwe_cap_post['capecid'] = str(q_cwe_cap.capecid)
+        # Verify before insert
+        if cwe_category.find_one(cwe_cap_post) is None:
+            cwe_category.insert_one(cwe_cap_post)
+        del cwe_cap_post
 
 # Call this function to start database migrations
 def main():
@@ -169,12 +183,18 @@ def main():
     print("[+] Re-Createing CWE Data")
     migrate_cwe_db()
     print("[+] Done")
-    '''
-    print("[+] Dropping CWE Categories!")
+    print("[+] Dropping CWE Categories")
     cwe_category.drop()
     print("[+] Re-Createing CWE Categories")
     migrate_cwe_category()
     print("[+] Done")
+    '''
+    print("[+] Dropping CWE CAPEC correlations")
+    cwe_capec.drop()
+    print("[+] Re-Createing CWE CAPEC correlations")
+    migrate_cwe_capec()
+    print("[+] Done")
+
 
 if __name__ == '__main__':
     main()

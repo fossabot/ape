@@ -57,7 +57,7 @@ class CweDb(BaseModel):
 
 class CweCapec(BaseModel):
     capecid = TextField(null=True)  # name
-    cweid = ForeignKeyField(db_column='cweid', rel_model=CweDb, to_field='cweid')
+    cweid = TextField(null=True)
 
     class Meta:
         db_table = 'cwe_capec'
