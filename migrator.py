@@ -43,16 +43,19 @@ def drop_nvd_db():
 def migrate_cve_cpe():
     Query_cve_cpe = CveCpe.select(CveCpe.cpeid, CveCpe.cveid).join(NvdDb).where(NvdDb.cveid==CveCpe.cveid)
     for q_cve_cpe in Query_cve_cpe:
-        #print(q_cve_cpe.cpeid, q_cve_cpe.cveid.cveid)
+        # Construct fields
         cve_cpe_post = {}
         cve_cpe_post['cpeid'] = str(q_cve_cpe.cpeid)
         cve_cpe_post['cveid'] = str(q_cve_cpe.cveid.cveid)
-        cve_cpe.insert_one(cve_cpe_post)
+        # Verify before insert
+        if cve_cpe.find_one(cve_cpe_post) is None:
+            cve_cpe.insert_one(cve_cpe_post)
         del cve_cpe_post
 
 def migrate_nvd_db():
     Query_nvd_db = NvdDb.select()
     for q_nvd_db in Query_nvd_db:
+        # Construct fields
         nvd_db_post = {}
         nvd_db_post['cveid'] = q_nvd_db.cveid
         nvd_db_post['date_published'] = q_nvd_db.date_published
@@ -67,20 +70,24 @@ def migrate_nvd_db():
         nvd_db_post['cvss_confidentiality_impact'] = q_nvd_db.cvss_confidentiality_impact
         nvd_db_post['cvss_integrity_impact'] = q_nvd_db.cvss_integrity_impact
         nvd_db_post['cvss_availability_impact'] = q_nvd_db.cvss_availability_impact
-        nvd_db.insert_one(nvd_db_post)
+        # Verify before insert
+        if nvd_db.find_one(nvd_db_post) is None:
+            nvd_db.insert_one(nvd_db_post)
         del nvd_db_post
 
 def migrate_cve_cwe():
     Query_cve_cwe = CveCwe.select(CveCwe.cweid, CveCwe.cveid).join(NvdDb).where(NvdDb.cveid==CveCwe.cveid)
     for q_cve_cpe in Query_cve_cwe:
-        #print(q_cve_cpe.cpeid, q_cve_cpe.cveid.cveid)
+        # Construct fields
         cve_cwe_post = {}
         cve_cwe_post['cveid'] = str(q_cve_cpe.cveid.cveid)
         cve_cwe_post['cweid'] = str(q_cve_cpe.cweid)
-        cve_cwe.insert_one(cve_cwe_post)
+        # Verify before insert
+        if cve_cwe.find_one(cve_cwe_post) is None:
+            cve_cwe.insert_one(cve_cwe_post)
         del cve_cwe_post
 
-
+# Call this function to start database migrations
 def main():
     print("[+] Dropping CVE_CPE correaltions! :-\\")
     cve_cpe.drop()
@@ -95,6 +102,5 @@ def main():
     print("[+] Re-Createing CVE_CWE correlations")
     migrate_cve_cwe()
     print("[+] Done")
-
 if __name__ == '__main__':
     main()
