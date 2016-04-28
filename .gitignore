@@ -1,8 +1,7 @@
 *.pyc
-<<<<<<< HEAD
+*.jar
 *.csv
 *.xls
 __pycache__/
-=======
-*.jar
->>>>>>> 0009c562ba122adbf2c8bf2478daa073713694a7
+*.json
+*.xml

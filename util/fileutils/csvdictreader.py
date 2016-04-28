@@ -32,7 +32,6 @@ class csvparser:
         Init
         '''
         self.file_path = os.path.abspath(file_path)
-        print(self.file_path)
 
     def parse(self):
         '''

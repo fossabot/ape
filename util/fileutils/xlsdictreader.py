@@ -41,8 +41,7 @@ class xlsparser:
         Init
         '''
         self.file_path = os.path.abspath(file_path)
-        print(self.file_path)
-
+        
     def parse(self, sheet_number):
         '''
         Parse starts reading the file
