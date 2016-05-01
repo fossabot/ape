@@ -10,6 +10,10 @@ from nltk.corpus import inaugural
 import pandas as pd
 import re
 
+
+print("Abbreviations")
+print(nltk.help.upenn_tagset())
+
 print("Gutenberg Ids:\n{}".format(nltk.corpus.gutenberg.fileids()))
 
 md = nltk.corpus.gutenberg.words("melville-moby_dick.txt")
@@ -201,8 +205,46 @@ moby = nltk.corpus.gutenberg.words("melville-moby_dick.txt")
 moby_22 = moby[:22]
 print(moby_22)
 
-
 for word in moby_22:
     if word.isalpha():
         print word
-        
+        print word.lower()
+
+# Doing the same - with comprehensions
+moby_norm_22 = [word.lower() for word in moby_22 if word.isalpha()]
+print("Norm:\n{}".format(moby_norm_22))
+
+# Stemmers
+############## Porter
+porter = nltk.PorterStemmer()
+my_list = ["cat", "cats", "dog", "dogs", "dawgs", "running", "city", "cities", "monday", "month", "monthly", "run"]
+
+for word in my_list:
+    print porter.stem(word)
+
+lancaster = nltk.LancasterStemmer()
+lancaster_list = [lancaster.stem(word) for word in my_list]
+print(lancaster_list)
+# Lancaster seems to work much better than porter
+
+# Lemmatization - Better results but more computationally intensive
+wnetlemma = nltk.WordNetLemmatizer()
+for word in my_list:
+    print wnetlemma.lemmatize(word)
+
+# Parts of speech
+
+text = "I walked to the cafe to buy coffee for work."
+tokens = nltk.word_tokenize(text)
+print("Parts of Phrase: {}".format(nltk.pos_tag(tokens)))
+print(nltk.pos_tag(nltk.word_tokenize("I am going to watch Game of Thrones Season 6 Episode 2 today at 8 PM")))
+
+
+moby_norm = [word.lower() for word in moby if word.isalpha()]
+moby_tags = nltk.pos_tag(moby_norm, tagset="universal")
+
+moby_nouns = [word for word in moby_tags if word[1] == "NOUN"]
+moby_nouns_fd = nltk.FreqDist(moby_nouns)
+
+# A description of moby dick 
+print(moby_nouns_fd.most_common(10))
