@@ -2,3 +2,6 @@ xlrd
 pymongo
 pandas
 nltk
+BeautifulSoup4
+mechanize
+html2text
