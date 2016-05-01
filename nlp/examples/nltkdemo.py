@@ -246,5 +246,18 @@ moby_tags = nltk.pos_tag(moby_norm, tagset="universal")
 moby_nouns = [word for word in moby_tags if word[1] == "NOUN"]
 moby_nouns_fd = nltk.FreqDist(moby_nouns)
 
-# A description of moby dick 
+# A description of moby dick
 print(moby_nouns_fd.most_common(10))
+
+# Multiple POS
+# With conditional Frequency distribution
+
+alice = nltk.corpus.gutenberg.words("carroll-alice.txt")
+alice_norm = [word.lower() for word in alice if word.isalpha()]
+alice_tags = nltk.pos_tag(alice_norm, tagset="universal")
+alice_cfd = nltk.ConditionalFreqDist(alice_tags)
+
+print(alice_cfd["over"])
+print(alice_cfd["lower"])
+for each in alice_cfd["answer"]:
+    print each
