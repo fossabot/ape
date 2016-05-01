@@ -1,8 +1,15 @@
+###########################################
+########## NLTK  Usage demonstration ######
+###########################################
+
+# Author: Sai Uday Shankar Korlimarla
+# Email: skorlimarla@unomaha.edu
+
 import nltk
 from nltk.corpus import inaugural
 import pandas as pd
+import re
 
-'''
 print("Gutenberg Ids:\n{}".format(nltk.corpus.gutenberg.fileids()))
 
 md = nltk.corpus.gutenberg.words("melville-moby_dick.txt")
@@ -52,19 +59,19 @@ print("Most Common: {}".format(alice_fd.most_common(5)))
 
 # Words used only once - It's called hapaxes
 print("Words Used Once: {}".format(alice_fd.hapaxes()))
-'''
+
 # Conditional Frequency distribution
 names = [("Group A", "Paul"), ("Group A", "Mike"), ("Group A", "Katy"), ("Group B", "Amy"), ("Group B", "Joe"), ("Group B", "Amy")]
 
 # Regular & Conditional Frequency distribution
-'''
+
 print(nltk.FreqDist(names))
 print(nltk.ConditionalFreqDist(names))
 for each in nltk.FreqDist(names):
     print each
 for each in nltk.ConditionalFreqDist(names):
     print each
-'''
+
 
 # Remove most common words
 alice = nltk.corpus.gutenberg.words("carroll-alice.txt")
@@ -125,3 +132,77 @@ fourgrams = n_grams(text2, 4)
 
 for item in fourgrams:
     print item
+
+
+##########################################
+########## REGEX and NLTK ################
+##########################################
+
+# Basic
+'''
+^  Start of string
+$ End of string
+. Wild card character
+[chr] Match one character
+[a-m] Matches one character in range
+'''
+
+# usage of basic- examples
+'''
+^...$ - All three letter words
+c..$ - Words starting with c
+^c  - Open ended -anything starting with c
+ing$ - Any word with ing as the last three letters
+^[chr]at$ - cat har or rat
+'''
+# More
+'''
+    ? - Previous character occurs 0 or 1 times
+    * - Previous character occurs 0 or more times
+    + - Previous character occurs 1 or more time
+    a|e - Matches one or the other
+    () - Parenthesis rouping for expressions
+    \ - Escape character
+'''
+# email ending with .com
+'''
+^.+@.+\.com$
+'''
+
+
+alice = nltk.corpus.gutenberg.words("carroll-alice.txt")
+print(set([word for word in alice if re.search("^new", word)]))
+print(set([word for word in alice if re.search("ful$", word)]))
+print(set([word for word in alice if re.search("^..nn..$", word)]))
+print(set([word for word in alice if re.search("^[chr]at$", word)]))
+print(set([word for word in alice if re.search("^.*nn.*$", word)]))
+print(set([word for word in alice if re.search("^[aeiou]c.+y$", word)]))
+
+
+#######################################
+########### Tokenization ##############
+########### Tagging ###################
+########### Chunking ##################
+#######################################
+
+# Tokenization
+my_text = "I am learning natural language processing"
+tokens = nltk.word_tokenize(my_text)
+print("Tokens:\n{}".format(tokens))
+phrase = "I am learning natural language processing. I am learning to tokenize"
+tokens_sent = nltk.sent_tokenize(phrase)
+print("Sentence Tokens:\n{}".format(tokens_sent))
+print("Breaking down further")
+for item in tokens_sent:
+    print(nltk.word_tokenize(item))
+
+# Normalizing
+moby = nltk.corpus.gutenberg.words("melville-moby_dick.txt")
+moby_22 = moby[:22]
+print(moby_22)
+
+
+for word in moby_22:
+    if word.isalpha():
+        print word
+        
