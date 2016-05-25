@@ -65,7 +65,9 @@ class cvetags:
         text_chunks = []
         chunk_index = 0
         for chunk in raw_chunks:
-            if hasattr(chunk, 'label') and self.chunk_label_type(chunk.label()):
+            # Uncomment this condition and comment below one - if accuracy on CVE vendor can be promised
+            #if hasattr(chunk, 'label') and self.chunk_label_type(chunk.label()):
+            if hasattr(chunk, 'label'):
                 text_chunks.append(''.join(c[0] for c in chunk.leaves()))
         return text_chunks
 
