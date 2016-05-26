@@ -10,7 +10,7 @@ from urllib import urlopen
 import pprint
 import json
 
-class cvetags:
+class cvecerttags:
     def __init__(self):
         # Create a mongodb client
         self.client = MongoClient("mongodb://localhost:27017")
@@ -58,7 +58,7 @@ class cvetags:
     # get tokens
     # Parts of Speech tagger
     # Then chunk for ORGANIZATION or FACILITY or GPE
-    # These tags can be used later for similarity - to identify CVEs
+    # These tags can be used later for similarity - to identify cvecerts
     def clean_html_to_tokens(self, clean_html_data):
         web_tokens = nltk.word_tokenize(clean_html_data)
         web_pos_tag = nltk.pos_tag(web_tokens)
@@ -66,39 +66,24 @@ class cvetags:
         text_chunks = []
         chunk_index = 0
         for chunk in raw_chunks:
-            # Uncomment this condition and comment below one - if accuracy on CVE vendor can be promised
+            # Uncomment this condition and comment below one - if accuracy on cvecert vendor can be promised
             #if hasattr(chunk, 'label') and self.chunk_label_type(chunk.label()):
             if hasattr(chunk, 'label'):
                 text_chunks.append(''.join(c[0] for c in chunk.leaves()))
         return text_chunks
 
-    def startTextChunkGeneration(self):
-            vfeed_db = cve_tagger.vfeed_db()
-            # Using projection - to fetch refname filed only - for generating tags
-            # _id:0 is not being used - _id is unique and is suitable for updates - cve_chunks_tag
-
-            projection = {"refname":1, "text_chunks":1}
-            counter = 0
-            for cve_ref in vfeed_db.cve_reference.find({},projection):
-                counter+=1
-                if not cve_ref['text_chunks'] or len(cve_ref['text_chunks']) == 0:
-                    text_chunks = []
-                    try:
-                        text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
-                    except Exception as e:
-                        text_chunks = ['SKIPPED_URL']
-                    vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
-                                                    'refname': cve_ref['refname']},
-                                                    {"$set": {
-                                                        'text_chunks': text_chunks
-                                                    }})
-                    print("_At: {}".format(counter))
-                    print(text_chunks)
-                else:
-                    print("At: {}".format(counter))
-                    pass
 
 if __name__ == '__main__':
-    cve_tagger = cvetags()
-    cve_tagger.startTextChunkGeneration()
-    sys.stdout.write("[+] Text Chunking done for CVE-REF!")
+    cvecert_tagger = cvecerttags()
+    vfeed_db = cvecert_tagger.vfeed_db()
+    # Using projection - to fetch refname filed only - for generating tags
+    # _id:0 is not being used - _id is unique and is suitable for updates - cvecert_chunks_tag
+    projection = {"certvulink":1}
+    for cvecert_ref in vfeed_db.map_cve_certvn.find({},projection):
+        text_chunks = []
+        try:
+            text_chunks = cvecert_tagger.clean_html_to_tokens(cvecert_tagger.get_html_from_url(cvecert_ref['certvulink']))
+        except Exception as e:
+            pass
+        vfeed_db.map_cve_certvn.update({'_id': cvecert_ref['_id']}, {"$set": {'text_chunks': text_chunks}})
+    sys.stdout.write("[+] Text Chunking done!")
