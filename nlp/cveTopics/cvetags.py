@@ -78,26 +78,27 @@ class cvetags:
             # _id:0 is not being used - _id is unique and is suitable for updates - cve_chunks_tag
 
             projection = {"refname":1, "text_chunks":1}
-            try:
-                count = 0
-                for cve_ref in vfeed_db.cve_reference.find({}):
-                    count+=1
-                    print("[AT] {}".format(count))
+
+            count = 0
+            for cve_ref in vfeed_db.cve_reference.find({}):
+                count+=1
+                print("[AT] {}".format(count))
+                try:
                     if len(cve_ref['text_chunks']):
                         pass
-            except Exception as e:
-                    text_chunks = []
-                    try:
-                        text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
-                    except Exception as e:
-                        pass
-                    vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
-                                                    'refname': cve_ref['refname']},
-                                                    {"$set": {
-                                                        'text_chunks': text_chunks
-                                                    }})
-                    print("[+] Captured new chunks")
-                    print(cve_ref)
+                except Exception as e:
+                        text_chunks = []
+                        try:
+                            text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
+                        except Exception as e:
+                            pass
+                        vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
+                                                        'refname': cve_ref['refname']},
+                                                        {"$set": {
+                                                            'text_chunks': text_chunks
+                                                        }})
+                        print("[+] Captured new chunks")
+                        print(cve_ref)
 
 
             sys.stdout.write("[+] Text Chunking done!")
