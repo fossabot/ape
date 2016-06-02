@@ -78,27 +78,31 @@ class cvetags:
             # _id:0 is not being used - _id is unique and is suitable for updates - cve_chunks_tag
 
             projection = {"refname":1, "text_chunks":1}
-            counter = 0
-            for cve_ref in vfeed_db.cve_reference.find({},projection):
-                counter+=1
-                if not cve_ref['text_chunks'] or len(cve_ref['text_chunks']) == 0:
+            try:
+                count = 0
+                for cve_ref in vfeed_db.cve_reference.find({}):
+                    count+=1
+                    print("[AT] {}".format(count))
+                    if len(cve_ref['text_chunks']):
+                        pass
+            except Exception as e:
                     text_chunks = []
                     try:
                         text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
                     except Exception as e:
-                        text_chunks = ['SKIPPED_URL']
+                        pass
                     vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
                                                     'refname': cve_ref['refname']},
                                                     {"$set": {
                                                         'text_chunks': text_chunks
                                                     }})
-                    print("_At: {}".format(counter))
-                    print(text_chunks)
-                else:
-                    print("At: {}".format(counter))
-                    pass
+                    print("[+] Captured new chunks")
+                    print(cve_ref)
+
+
+            sys.stdout.write("[+] Text Chunking done!")
+
 
 if __name__ == '__main__':
     cve_tagger = cvetags()
     cve_tagger.startTextChunkGeneration()
-    sys.stdout.write("[+] Text Chunking done for CVE-REF!")
