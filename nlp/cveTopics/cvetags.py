@@ -84,26 +84,22 @@ class cvetags:
                 count+=1
                 print("[AT] {}".format(count))
                 try:
-                    if len(cve_ref['text_chunks']):
-                        pass
-                except Exception as e:
-                        text_chunks = []
-                        try:
-                            text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
-                        except Exception as e:
-                            pass
-                        vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
+                    text_chunks = cve_tagger.clean_html_to_tokens(cve_tagger.get_html_from_url(cve_ref['refname']))
+                    vfeed_db.cve_reference.update({'_id': cve_ref['_id'],
                                                         'refname': cve_ref['refname']},
                                                         {"$set": {
                                                             'text_chunks': text_chunks
                                                         }})
-                        print("[+] Captured new chunks")
-                        print(cve_ref)
-
-
+                except Exception as e:
+                    pass
+                print("Update Op!")
+                print("[+] Captured new chunks")
             sys.stdout.write("[+] Text Chunking done!")
 
 
 if __name__ == '__main__':
     cve_tagger = cvetags()
     cve_tagger.startTextChunkGeneration()
+
+
+
