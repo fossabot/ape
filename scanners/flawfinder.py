@@ -30,7 +30,7 @@ def create_temporary_copy(package):
         with zipfile.ZipFile(temp_package) as zf:
             zf.extractall(temp_dir)
             scan_target = temp_dir + '/' + zf.namelist()[0]
-            sys.stdout.write(flawfinderscan(scan_target))
+            clean_flawfinder_results(flawfinderscan(scan_target))
         os.remove(temp_package)
         return temp_dir
 
@@ -54,21 +54,26 @@ def flawfinderscan(package_to_scan):
     if os.path.isdir(package_to_scan):
         flawfinder_out = subprocess.check_output(flawfinder_args)
         return(flawfinder_out)
-        # If required to iterate line by line like a human
-        '''
-        for line in flawfinder_out.split(os.linesep):
-            print(line+"\n")
-        '''
     else:
         sys.stderr.write("[-] Flawfinder Error:1")
 	sys.exit(-1)
+
+
+def clean_flawfinder_results(scan_results):
+    cwe_match = re.compile('CWE-\d+', re.IGNORECASE)
+    cwe_list = [] 
+    for line in scan_results.split(os.linesep):
+         cwe_found = cwe_match.findall(line)
+         if cwe_found:
+             cwe_list.append(cwe_found)
+    cwe_list = tuple(cwe_list)
+
 
 
 if __name__ == '__main__':
    #flawfinderscan(sys.argv[1])
    temp_dir = create_temporary_copy(sys.argv[1])
    if temp_dir:
-       print(temp_dir)
        delete_temporary_copy(temp_dir)
    else:
       pass
