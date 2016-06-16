@@ -12,15 +12,48 @@ import re
 import subprocess
 import sys
 import os
+import tempfile
+import shutil
+import zipfile
+import tarfile
+from StringIO import StringIO
+import glob
 
-def flawfinderscan(directory_to_scan):
-    directory_to_scan = os.path.abspath(directory_to_scan)
+
+def create_temporary_copy(package):
+    temp_dir = ''
+    try:
+        temp_dir = tempfile.mkdtemp()
+        # Verify Package type - for later
+        shutil.copy(os.path.abspath(package), temp_dir)
+        temp_package = glob.glob(temp_dir+'/*.zip')[0]
+        with zipfile.ZipFile(temp_package) as zf:
+            zf.extractall(temp_dir)
+            scan_target = temp_dir + '/' + zf.namelist()[0]
+            sys.stdout.write(flawfinderscan(scan_target))
+        os.remove(temp_package)
+        return temp_dir
+
+    except Exception as e:
+        print(e)
+        print("error")
+        return None
+
+def delete_temporary_copy(temp_dir):
+    if os.path.isdir(temp_dir):
+        shutil.rmtree(temp_dir)
+    else:
+        pass
+
+
+def flawfinderscan(package_to_scan):
+    package_to_scan = os.path.abspath(package_to_scan)
     flawfinder_args = ['flawfinder', '--quiet', '--dataonly',\
                        '--inputs', '--neverignore', '--followdotdir',\
-                       '--columns', '--singleline',directory_to_scan]
-    if os.path.isdir(directory_to_scan):
+                       '--columns', '--singleline', package_to_scan]
+    if os.path.isdir(package_to_scan):
         flawfinder_out = subprocess.check_output(flawfinder_args)
-        sys.stdout.write(flawfinder_out)
+        return(flawfinder_out)
         # If required to iterate line by line like a human
         '''
         for line in flawfinder_out.split(os.linesep):
@@ -28,8 +61,14 @@ def flawfinderscan(directory_to_scan):
         '''
     else:
         sys.stderr.write("[-] Flawfinder Error:1")
-
+	sys.exit(-1)
 
 
 if __name__ == '__main__':
-   flawfinderscan(sys.argv[1])
+   #flawfinderscan(sys.argv[1])
+   temp_dir = create_temporary_copy(sys.argv[1])
+   if temp_dir:
+       print(temp_dir)
+       delete_temporary_copy(temp_dir)
+   else:
+      pass
