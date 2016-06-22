@@ -60,26 +60,47 @@ import xml.etree.ElementTree as ET
 
 
 def setOhlohBaseURL():
+    '''
+    Ohloh base URL is https://www.openhub.net/
+    '''
     return "https://www.openhub.net/"
 
 def email_to_md5(emailAddress):
+    '''
+    emailAddress: Address of a person to be found on Ohloh
+    email_to_md5 returns MD5 hexdigest
+    '''
     email = hashlib.md5()
     email.update(emailAddress)
     return str(email.hexdigest())
 
 
-# Take API Key and return URL Encoded
+
 def setOhlohAPIkey():
+    '''
+    Read Ohloh API Key from configuration file
+    '''
     apiKey = ''
     with open('openhub.conf', 'r') as OhlohConf:
         apiKey = OhlohConf.readline().strip()
     return urllib.urlencode({'api_key': apiKey, 'v': 1})
 
 def setOhlohPathType(path):
+    '''
+    Choice of paths on Ohloh:
+        Usage:
+            Choose one of (people, organization, project)
+    '''
     OhlohPaths = {"people":'accounts', 'organization':'org', 'project': 'p' }
     return OhlohPaths[path]
 
 def preParse(OhlohBaseURL, OhlohPath, searchAttr, params):
+    '''
+    Construct a URL for Ohloh API
+        Args: OhlohBaseURL, path, search attributes and params (API Key)
+        Warning: if something other than email is used, hexdigest is still produced
+
+    '''
     if OhlohPath == 'accounts':
         searchAttr = email_to_md5(searchAttr)
     OhlohFormedURL = "{0}{1}/{2}.xml?{3}".format(OhlohBaseURL, OhlohPath, searchAttr, params)
@@ -87,6 +108,11 @@ def preParse(OhlohBaseURL, OhlohPath, searchAttr, params):
 
 
 def xmlDocTree(OhlohFormedURL):
+    '''
+    Read a URL and return XML object of Ohloh results
+    Args:
+        Ohloh URL to access Ohloh API
+    '''
     f = urllib.urlopen(OhlohFormedURL)
     # Parse the response into a structured XML object and return
     tree = ET.parse(f)
@@ -98,7 +124,11 @@ def xmlDocTree(OhlohFormedURL):
     return elementTree
 
 def parse_people(elementTree):
-    print(elementTree)
+    '''
+    Parse and Pick content if path choice is people
+    Args:
+        elementTree from xmlDocTree
+    '''
     for node in elementTree.find("result/account"):
         if node.tag == "kudo_score":
             print "%s:" % node.tag
@@ -108,19 +138,31 @@ def parse_people(elementTree):
             print "%s:\t%s" % (node.tag, node.text)
 
 def parse_project(elementTree):
+    '''
+    Parse and pick content if path choice is project
+    Args:
+        elementTree from xmlDocTree
+    Return:
+        1. Tags for project are returned
+    '''
     foundTags = []
-    for node in elementTree.find("result/project/tags"):
-        foundTags.append(node.text)
-    if foundTags:
-        return foundTags
-    else:
+    try:
+        for node in elementTree.find("result/project/tags"):
+            foundTags.append(node.text)
+            if foundTags:
+                return foundTags
+    except Exception as e:
         return ["No Tags Found!"]
+
 def parse_organization(elementTree):
-    raise NotImplementedError
-
-
-def parser_not_found():
-    print("[-] Error in inputs, please verify")
+    '''
+    *******************************
+    * This is not yet implemented *
+    *******************************
+    Parse and pick content if path choice is organization
+    Args:
+        elementTree from xmlDocTree
+    '''
     raise NotImplementedError
 
 
