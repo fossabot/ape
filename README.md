@@ -4,7 +4,7 @@ Adv. package enumeration
 # Installing dependencies on Linux
 
   * On Ubuntu: `sudo apt-get install matplotlib`
-  * On centOS: `sudo yum install matplootlib`
+  * On centOS: `sudo yum install matplotlib`
   * Python dependencies can be installed by `pip install -r requirements.txt`
 
 # Populating dependency projects
