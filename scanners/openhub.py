@@ -149,10 +149,10 @@ def parse_project(elementTree):
     try:
         for node in elementTree.find("result/project/tags"):
             foundTags.append(node.text)
-            if foundTags:
-                return foundTags
+        if foundTags:
+            return foundTags
     except Exception as e:
-        return ["No Tags Found!"]
+        return "NoTags"
 
 def parse_organization(elementTree):
     '''
@@ -168,6 +168,7 @@ def parse_organization(elementTree):
 
 if __name__ == '__main__':
     requstedPath = sys.argv[1]
+    searchAttr = sys.argv[2]
     OhlohPath = setOhlohPathType(requstedPath)
     searchAttr = sys.argv[2]
     params = setOhlohAPIkey()
@@ -179,4 +180,7 @@ if __name__ == '__main__':
     elif requstedPath == 'organization':
         parse_organization(elementTree=elementTree)
     elif requstedPath == 'project':
-        print(parse_project(elementTree=elementTree))
+        tags_raw = ''
+        tags = parse_project(elementTree=elementTree)
+        tags_raw += ','.join(tags)
+        sys.stdout.write(tags_raw)

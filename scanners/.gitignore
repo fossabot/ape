@@ -5,3 +5,5 @@
 *.bz2
 *.rar
 *.conf
+*.swp
+*.pyc
