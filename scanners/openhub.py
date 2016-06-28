@@ -46,6 +46,7 @@ Pass the email address of the account as the second parameter to this script.
 import sys
 import urllib
 import hashlib
+import os
 
 from pymongo import MongoClient
 
@@ -84,7 +85,8 @@ def setOhlohAPIkey():
     Read Ohloh API Key from configuration file
     '''
     apiKey = ''
-    with open('openhub.conf', 'r') as OhlohConf:
+    ohloh_conf = os.path.abspath('openhub.conf')
+    with open(ohloh_conf, 'r') as OhlohConf:
         apiKey = OhlohConf.readline().strip()
     return urllib.urlencode({'api_key': apiKey, 'v': 1})
 
