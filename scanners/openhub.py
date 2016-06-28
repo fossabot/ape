@@ -46,6 +46,9 @@ Pass the email address of the account as the second parameter to this script.
 import sys
 import urllib
 import hashlib
+
+from pymongo import MongoClient
+
 # import ElementTree based on the python version
 '''
 # Hailmary elementtree imports
@@ -145,14 +148,69 @@ def parse_project(elementTree):
     Return:
         1. Tags for project are returned
     '''
-    foundTags = []
-    try:
-        for node in elementTree.find("result/project/tags"):
-            foundTags.append(node.text)
-        if foundTags:
-            return foundTags
-    except Exception as e:
-        return "NoTags"
+    openhubData = {}
+    tags = []
+    facts = {}
+    languages = {}
+    logo = ''
+    loc = ''
+    commitcount = ''
+    main_lang = ''
+    activity_index = {}
+    description = ''
+    url = ''
+    created_at = ''
+    updated_at = ''
+    rating = ''
+    rating_count = ''
+    review_count = ''
+    project_id = ''
+    project_name = ''
+
+    project_name = elementTree.find("result/project/name").text
+    project_id = elementTree.find("result/project/id").text
+    
+    for node in elementTree.find("result/project/tags"):
+        tags.append(node.text.strip())
+    for node in elementTree.find("result/project/analysis/factoids"):
+        facts[node.attrib['type'].strip()] = node.text.strip()
+    for node in elementTree.find("result/project/analysis/languages"):
+        languages[node.text.strip()] = node.attrib['percentage'].strip()
+    
+    logo = elementTree.find("result/project/small_logo_url").text
+    loc = elementTree.find("result/project/analysis/total_code_lines").text
+    commitcount = elementTree.find("result/project/analysis/total_commit_count").text
+    main_lang = elementTree.find("result/project/analysis/main_language_name").text
+    
+    for node in elementTree.find("result/project/project_activity_index"):
+        activity_index[node.tag] = node.text
+    description = elementTree.find("result/project/description").text
+    url = elementTree.find("result/project/url").text
+    updated_at = elementTree.find("result/project/updated_at").text
+    created_at = elementTree.find("result/project/created_at").text
+    rating = elementTree.find("result/project/average_rating").text
+    rating_count = elementTree.find("result/project/rating_count").text
+    review_count = elementTree.find("result/project/review_count").text
+
+    openhubData['project_id'] = project_id
+    openhubData['project_name'] = project_name
+    openhubData['facts'] = facts
+    openhubData['tags'] = tags
+    openhubData['languages'] = languages
+    openhubData['logo'] = logo
+    openhubData['loc'] = loc
+    openhubData['commitcount'] = commitcount
+    openhubData['main_lang'] = main_lang
+    openhubData['activity_index'] = activity_index
+    openhubData['description'] = description
+    openhubData['url'] = url
+    openhubData['created_at'] = created_at
+    openhubData['updated_at'] = updated_at
+    openhubData['rating'] = rating
+    openhubData['rating_count'] = rating_count
+    openhubData['review_count'] = review_count
+
+    return openhubData
 
 def parse_organization(elementTree):
     '''
@@ -165,6 +223,18 @@ def parse_organization(elementTree):
     '''
     raise NotImplementedError
 
+def insert_into_database(openhubData):
+    mongo_url = 'mongodb://localhost:27017/'
+    client = MongoClient(mongo_url)
+    ape_db = client['apedb']
+    openhub = ape_db.openhub
+    if openhub.find_one(openhubData) is None:
+        post_id = openhub.insert_one(openhubData).inserted_id
+        return post_id
+    else:
+        existing = ''
+        existing = openhub.find_one(openhubData)
+        return existing['_id']
 
 if __name__ == '__main__':
     requstedPath = sys.argv[1]
@@ -180,7 +250,6 @@ if __name__ == '__main__':
     elif requstedPath == 'organization':
         parse_organization(elementTree=elementTree)
     elif requstedPath == 'project':
-        tags_raw = ''
-        tags = parse_project(elementTree=elementTree)
-        tags_raw += ','.join(tags)
-        sys.stdout.write(tags_raw)
+        openhubData = parse_project(elementTree=elementTree)
+        mid = insert_into_database(openhubData)
+        sys.stdout.write(str(mid))
