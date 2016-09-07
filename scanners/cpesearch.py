@@ -5,10 +5,17 @@ import re
 from getProject import getProject
 import zipfile
 
+def save_matches(nvd_matches, upload_id):
+    client = MongoClient()
+    db = client.apedb
+    for entry in nvd_matches:
+        entry['upload_id'] = upload_id
+        db.nvd_match.insert_one(entry)
 
-def product(package):
+def product(upload_id, package):
     product = getProject(package)
-    minify(package, product)
+    nvd_matches = minify(package, product)
+    save_matches(nvd_matches, upload_id)
 
 def minify(package, product):
     zipreader = zipfile.ZipFile(os.path.abspath(package))
@@ -25,8 +32,7 @@ def minify(package, product):
         results = getCPE(product,version)
     else:
         results = getCPE(product)
-    for each_cpe in results:
-        print(each_cpe)
+    return results
 
 
 def getCPE(productname, version):
@@ -41,4 +47,5 @@ def getCPE(productname, version):
     return cve_cpes
 
 if __name__ == '__main__':
-    product(sys.argv[1])
+    product(sys.argv[1], sys.argv[2])
+    sys.stdout.write("[+] Done\n")
