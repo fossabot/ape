@@ -18,9 +18,42 @@ import zipfile
 import tarfile
 from StringIO import StringIO
 import glob
+import time
+from pymongo import MongoClient
 
 
-def create_temporary_copy(package):
+
+
+def save_flaws(weakness_raw, upload_id):
+    raw_data = weakness_raw.split(os.linesep)
+    
+    client = MongoClient()
+    db = client.apedb
+
+    cwe_match = re.compile('CWE-\d+', re.IGNORECASE)
+    file_line_match = re.compile('[0-9]+\:[0-9]+', re.IGNORECASE)
+    file_name_match = re.compile('(/.*/.*/*)\:[0-9]+', re.IGNORECASE)
+    category_match = re.compile('\([a-zA-Z]+\)', re.IGNORECASE)
+
+    for each_raw in raw_data:
+        cwe_found = cwe_match.findall(each_raw)
+        line_found = file_line_match.findall(each_raw)
+        file_found = file_name_match.findall(each_raw)
+        category_found = category_match.findall(each_raw)
+        if cwe_found and line_found and file_found and category_found:
+            db.flawfinder.insert_one({
+ 
+                                      "upload_id": upload_id,
+                                      "WeaknessID": cwe_found,
+                                      "FilePath": file_found[0].split(':')[0],
+                                      "Location": line_found,
+                                      "Category": category_found,
+                                      "timestamp": int(time.time())
+                                    })
+    sys.stdout.write(upload_id)
+
+
+def create_temporary_copy(upload_id, package):
     temp_dir = ''
     try:
         temp_dir = tempfile.mkdtemp()
@@ -30,7 +63,9 @@ def create_temporary_copy(package):
         with zipfile.ZipFile(temp_package) as zf:
             zf.extractall(temp_dir)
             scan_target = temp_dir + '/' + zf.namelist()[0]
-            sys.stdout.write(clean_flawfinder_results(flawfinderscan(scan_target)))
+            #sys.stdout.write(clean_flawfinder_results(flawfinderscan(scan_target)))
+            #print(flawfinderscan(scan_target))
+            save_flaws(flawfinderscan(scan_target), upload_id)
         os.remove(temp_package)
         return temp_dir
 
@@ -71,7 +106,7 @@ def clean_flawfinder_results(scan_results):
 
 if __name__ == '__main__':
    #flawfinderscan(sys.argv[1])
-   temp_dir = create_temporary_copy(sys.argv[1])
+   temp_dir = create_temporary_copy(sys.argv[1], sys.argv[2])
    if temp_dir:
        delete_temporary_copy(temp_dir)
    else:
