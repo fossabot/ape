@@ -76,31 +76,23 @@ def fetch_and_save(scan_id, upload_id, directory):
         
 
 
-def grepbugsHelper(upload_id, package):
-    print("scanning") 
+def grepbugsHelper(upload_id, package): 
     temp_dir = tempfile.mkdtemp()
     with zipfile.ZipFile(package) as to_scan_Zip:
         to_scan_Zip.extractall(temp_dir)
     dir_to_scan = [x[0] for x in os.walk(temp_dir)]
-    #print(dir_to_scan[1])
     current_dir = os.getcwd()
     os.chdir(os.path.expanduser('~'))
     os.chdir('GrepBugs/')
-    print(os.getcwd()) 
     command_to_run = 'python ~/GrepBugs/grepbugs.py -d ' + str(dir_to_scan[1])
     output = os.popen(command_to_run).read().split('\n')
     os.chdir(current_dir)
-    print(os.getcwd())
     shutil.rmtree(dir_to_scan[1])
     
     scan_id_match = re.compile('.*-.*-.*-.*-.*', re.IGNORECASE)
-    print(len(output))
-    print(output)
-    print(str(dir_to_scan[1]))
     for item in output:
         scan_id = scan_id_match.findall(item)
         if scan_id:
-            print(scan_id)
             fetch_and_save(scan_id[0], upload_id, str(dir_to_scan[1]))
         else:
             sys.stderr.write("no match \n")
