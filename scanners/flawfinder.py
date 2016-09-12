@@ -41,7 +41,7 @@ def save_flaws(weakness_raw, upload_id):
         file_found = file_name_match.findall(each_raw)
         category_found = category_match.findall(each_raw)
         if cwe_found and line_found and file_found and category_found:
-            db.flawfinder.insert_one({
+            db.flawfinder.update({
  
                                       "upload_id": upload_id,
                                       "WeaknessID": cwe_found,
@@ -49,8 +49,18 @@ def save_flaws(weakness_raw, upload_id):
                                       "Location": line_found,
                                       "Category": category_found,
                                       "timestamp": int(time.time())
-                                    })
-    sys.stdout.write(upload_id)
+                                    }, 
+                                 {
+
+                                      "upload_id": upload_id,
+                                      "WeaknessID": cwe_found,
+                                      "FilePath": file_found[0].split(':')[0],
+                                      "Location": line_found,
+                                      "Category": category_found,
+                                      "timestamp": int(time.time())
+                                  }, upsert=True 
+                                )
+    sys.stdout.write('done')
 
 
 def create_temporary_copy(upload_id, package):

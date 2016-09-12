@@ -67,9 +67,9 @@ def fetch_and_save(scan_id, upload_id, directory):
             t_results.append(t_result)
     
     for entry in results:
-        db.grepbugs_result.insert_one(entry)
+        db.grepbugs_result.update(entry, entry, upsert=True)
     for entry in t_results:
-        db.grepbugs_details.insert_one(entry)
+        db.grepbugs_details.update(entry, entry, upsert=True)
     sys.stdout.write("[+] Done\n") 
     conn.close()
     sys.exit(0) 

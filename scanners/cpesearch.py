@@ -5,12 +5,24 @@ import re
 from getProject import getProject
 import zipfile
 
+
+def getcweid(cveid):
+    client = MongoClient()
+    vFeed = client['vFeed']
+    cve_cwe = vFeed.cve_cwe
+    found_cwes = []
+    for each_cwe in cve_cwe.find({'cveid': cveid}):
+        found_cwes.append(each_cwe['cweid'])
+    return list(set(found_cwes))
+
+
 def save_matches(nvd_matches, upload_id):
     client = MongoClient()
     db = client.apedb
     for entry in nvd_matches:
+        entry['cweid'] = getcweid(entry['cveid'])
         entry['upload_id'] = upload_id
-        db.nvd_match.insert_one(entry)
+        db.nvd_match.update(entry, entry, upsert=True)
 
 def product(upload_id, package):
     product = getProject(package)
@@ -29,9 +41,7 @@ def minify(package, product):
     if ver_match:
         version = ver_match.group(1)
         version = version.replace('_','.')
-        results = getCPE(product,version)
-    else:
-        results = getCPE(product)
+    results = getCPE(product,version)
     return results
 
 
@@ -46,6 +56,8 @@ def getCPE(productname, version):
         cve_cpes.append(each_finding)
     return cve_cpes
 
+
 if __name__ == '__main__':
     product(sys.argv[1], sys.argv[2])
     sys.stdout.write("[+] Done\n")
+    update_all_with_cwes()
