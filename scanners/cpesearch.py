@@ -10,10 +10,13 @@ def getcweid(cveid):
     client = MongoClient()
     vFeed = client['vFeed']
     cve_cwe = vFeed.cve_cwe
-    found_cwes = []
-    for each_cwe in cve_cwe.find({'cveid': cveid}):
-        found_cwes.append(each_cwe['cweid'])
-    return list(set(found_cwes))
+    found_cwe = ''
+    result = cve_cwe.find_one({'cveid': cveid})
+    if result:
+        return result['cweid']
+    else:
+        return "No CWE"
+    
 
 
 def save_matches(nvd_matches, upload_id):
@@ -34,14 +37,30 @@ def minify(package, product):
     name_list = zipreader.namelist()
     version_raw = name_list[0]
     version_raw = version_raw.strip('/')
-    ver_match = re.match(".*(\d+[_\.]\d+[_\.]\d+([a-z]+)?)", version_raw)
+ 
+    version_raw = version_raw.replace('_', '.')
+    version_raw = version_raw.replace('-','.')
+   
+    ver_pat_1 = re.compile('.*(\d+.+\d+.+\d+(?:))[.](.*)')
+    ver_pat_2 = re.compile('.*(\d+.+\d+.+\d+[a-zA-Z0-9]+)')
+    ver_pat_3 = re.compile('.*(\d+\.+\d+\.+\d+).*')
+
+    version_found_1 = ver_pat_1.findall(version_raw)
+    version_found_2 = ver_pat_2.findall(version_raw)
+    version_found_3 = ver_pat_3.findall(version_raw)
+
     version = ''
-    stdout_results = ''
+ 
+    if version_found_1:
+        version =  ':'.join(version_found_1[0])
+    elif version_found_2: 
+        version = version_found_2[0]
+    else:
+        version = version_found_3[0]
     results = []
-    if ver_match:
-        version = ver_match.group(1)
-        version = version.replace('_','.')
+    
     results = getCPE(product,version)
+    
     return results
 
 
@@ -49,7 +68,8 @@ def getCPE(productname, version):
     client = MongoClient()
     vFeed = client['vFeed']
     cve_cpe = vFeed.cve_cpe
-    regexpattern = ".*"+productname+".*"+version+".*"
+    
+    regexpattern = "cpe:/.*"+productname+".*:.*"+version
     cve_cpe_cur = cve_cpe.find({'cpeid': {'$regex': regexpattern}}, {'_id':0, 'cpeid':1, 'cveid':1})
     cve_cpes = []
     for each_finding in cve_cpe_cur:
@@ -60,4 +80,3 @@ def getCPE(productname, version):
 if __name__ == '__main__':
     product(sys.argv[1], sys.argv[2])
     sys.stdout.write("[+] Done\n")
-    update_all_with_cwes()

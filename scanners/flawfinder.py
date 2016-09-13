@@ -18,7 +18,6 @@ import zipfile
 import tarfile
 from StringIO import StringIO
 import glob
-import time
 from pymongo import MongoClient
 
 
@@ -47,8 +46,7 @@ def save_flaws(weakness_raw, upload_id):
                                       "WeaknessID": cwe_found,
                                       "FilePath": file_found[0].split(':')[0],
                                       "Location": line_found,
-                                      "Category": category_found,
-                                      "timestamp": int(time.time())
+                                      "Category": category_found
                                     }, 
                                  {
 
