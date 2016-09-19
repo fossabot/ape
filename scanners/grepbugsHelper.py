@@ -69,10 +69,8 @@ def fetch_and_save(scan_id, upload_id, directory):
     for entry in results:
         db.grepbugs_result.update(entry, entry, upsert=True)
     for entry in t_results:
-        db.grepbugs_details.update(entry, entry, upsert=True)
-    sys.stdout.write("[+] Done\n") 
+        db.grepbugs_details.update(entry, entry, upsert=True) 
     conn.close()
-    sys.exit(0) 
         
 
 
@@ -88,14 +86,9 @@ def grepbugsHelper(upload_id, package):
     output = os.popen(command_to_run).read().split('\n')
     os.chdir(current_dir)
     shutil.rmtree(dir_to_scan[1])
+    scan_id = output[len(output)-1]
+    fetch_and_save(scan_id, upload_id, str(dir_to_scan[1]))
     
-    scan_id_match = re.compile('.*-.*-.*-.*-.*', re.IGNORECASE)
-    for item in output:
-        scan_id = scan_id_match.findall(item)
-        if scan_id:
-            fetch_and_save(scan_id[0], upload_id, str(dir_to_scan[1]))
-        else:
-            sys.stderr.write("no match \n")
 
 
 if __name__ == '__main__':

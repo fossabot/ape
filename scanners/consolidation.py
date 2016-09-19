@@ -3,6 +3,8 @@ import sys
 import re
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from collections import Counter
+
 
 def drop_consolidation(apepackage):
     apepackage.drop()
@@ -27,6 +29,8 @@ def start_consolidation(apedb):
         grepbugs_result_data = get_gb_results_data(grepbugs_result, upload_id)
         grepbugs_details_data = get_gb_details_data(grepbugs_details, upload_id)
         nvd_match_data = get_nvd_match_data(nvd_match, upload_id)
+
+
 
         if nvd_match_data['nvd_cwe_count'] == 0:
             nvd_match_data['nvd_cwe_count'] = 1
@@ -84,11 +88,18 @@ def get_openhub_data(openhub, openhub_id):
 
 def get_flawfinder_data(flawfinder, upload_id):
     flawfinder_data = {}
+    cwe_prefreq = []
     flawfinder_data['affected_files_count'] = flawfinder.find({'upload_id': upload_id}).count()
     cwe_count = 0
     for each_file in flawfinder.find({'upload_id': upload_id}):
         cwe_count += len(each_file['WeaknessID'])
+        for each_cweid in each_file['WeaknessID']:
+            cwe_prefreq.append(each_cweid)
     flawfinder_data['cwe_count'] = cwe_count
+
+    for key in Counter(cwe_prefreq):
+        flawfinder_data[key] = Counter(cwe_prefreq)[key]
+    
     return flawfinder_data
 
 def get_gb_results_data(grepbugs_result, upload_id):

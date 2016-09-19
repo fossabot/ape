@@ -54,11 +54,10 @@ def save_flaws(weakness_raw, upload_id):
                                       "WeaknessID": cwe_found,
                                       "FilePath": file_found[0].split(':')[0],
                                       "Location": line_found,
-                                      "Category": category_found,
-                                      "timestamp": int(time.time())
+                                      "Category": category_found
                                   }, upsert=True 
                                 )
-    sys.stdout.write('done')
+    
 
 
 def create_temporary_copy(upload_id, package):
@@ -75,6 +74,7 @@ def create_temporary_copy(upload_id, package):
             #print(flawfinderscan(scan_target))
             save_flaws(flawfinderscan(scan_target), upload_id)
         os.remove(temp_package)
+        delete_temporary_copy(temp_dir)
         return temp_dir
 
     except Exception as e:

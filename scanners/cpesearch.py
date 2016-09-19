@@ -32,6 +32,8 @@ def product(upload_id, package):
     nvd_matches = minify(package, product)
     save_matches(nvd_matches, upload_id)
 
+
+
 def minify(package, product):
     zipreader = zipfile.ZipFile(os.path.abspath(package))
     name_list = zipreader.namelist()
@@ -44,6 +46,7 @@ def minify(package, product):
     ver_pat_1 = re.compile('.*(\d+.+\d+.+\d+(?:))[.](.*)')
     ver_pat_2 = re.compile('.*(\d+.+\d+.+\d+[a-zA-Z0-9]+)')
     ver_pat_3 = re.compile('.*(\d+\.+\d+\.+\d+).*')
+    ver_pat_3 = re.compile('.*(\d+\.\d+\..*)')
 
     version_found_1 = ver_pat_1.findall(version_raw)
     version_found_2 = ver_pat_2.findall(version_raw)
@@ -55,8 +58,13 @@ def minify(package, product):
         version =  ':'.join(version_found_1[0])
     elif version_found_2: 
         version = version_found_2[0]
-    else:
+    elif version_found_3:
         version = version_found_3[0]
+    elif version_found_4:
+        version = version_foun_4[0]
+    else:
+        version = ''
+
     results = []
     
     results = getCPE(product,version)
@@ -68,12 +76,14 @@ def getCPE(productname, version):
     client = MongoClient()
     vFeed = client['vFeed']
     cve_cpe = vFeed.cve_cpe
-    
+    nvd_db = vFeed.nvd_db
     regexpattern = "cpe:/.*"+productname+".*:.*"+version
     cve_cpe_cur = cve_cpe.find({'cpeid': {'$regex': regexpattern}}, {'_id':0, 'cpeid':1, 'cveid':1})
     cve_cpes = []
     for each_finding in cve_cpe_cur:
+        each_finding['cvss_base'] = nvd_db.find_one({'cveid': each_finding['cveid']}, {'_id':0, 'cvss_base':1})['cvss_base']
         cve_cpes.append(each_finding)
+        
     return cve_cpes
 
 

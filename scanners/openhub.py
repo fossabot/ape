@@ -226,11 +226,13 @@ def parse_organization(elementTree):
     '''
     raise NotImplementedError
 
-def insert_into_database(openhubData):
+def insert_into_database(openhubData, upload_id):
     mongo_url = 'mongodb://localhost:27017/'
     client = MongoClient(mongo_url)
     ape_db = client['apedb']
     openhub = ape_db.openhub
+    uploads = ape_db.uploads
+    uploads.update({'_id': upload_id},{'$set': {'logo': openhubData['logo']}})
     if openhub.find_one(openhubData) is None:
         post_id = openhub.insert_one(openhubData).inserted_id
         return post_id
@@ -244,6 +246,7 @@ if __name__ == '__main__':
     searchAttr = sys.argv[2]
     OhlohPath = setOhlohPathType(requstedPath)
     searchAttr = sys.argv[2]
+    upload_id = sys.argv[3]
     params = setOhlohAPIkey()
     baseURL = setOhlohBaseURL()
     OhlohAbsURL = preParse(OhlohBaseURL= baseURL,OhlohPath=OhlohPath, searchAttr=searchAttr, params=params)
@@ -254,5 +257,5 @@ if __name__ == '__main__':
         parse_organization(elementTree=elementTree)
     elif requstedPath == 'project':
         openhubData = parse_project(elementTree=elementTree)
-        mid = insert_into_database(openhubData)
+        mid = insert_into_database(openhubData, upload_id)
         sys.stdout.write(str(mid))
