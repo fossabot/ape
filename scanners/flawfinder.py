@@ -45,16 +45,16 @@ def save_flaws(weakness_raw, upload_id):
                                       "upload_id": upload_id,
                                       "WeaknessID": cwe_found,
                                       "FilePath": file_found[0].split(':')[0],
-                                      "Location": line_found,
-                                      "Category": category_found
+                                      "Location": line_found[0],
+                                      "Category": category_found[0].strip()
                                     }, 
                                  {
 
                                       "upload_id": upload_id,
                                       "WeaknessID": cwe_found,
                                       "FilePath": file_found[0].split(':')[0],
-                                      "Location": line_found,
-                                      "Category": category_found
+                                      "Location": line_found[0],
+                                      "Category": category_found[0].strip()
                                   }, upsert=True 
                                 )
     

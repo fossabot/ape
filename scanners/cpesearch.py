@@ -46,11 +46,12 @@ def minify(package, product):
     ver_pat_1 = re.compile('.*(\d+.+\d+.+\d+(?:))[.](.*)')
     ver_pat_2 = re.compile('.*(\d+.+\d+.+\d+[a-zA-Z0-9]+)')
     ver_pat_3 = re.compile('.*(\d+\.+\d+\.+\d+).*')
-    ver_pat_3 = re.compile('.*(\d+\.\d+\..*)')
+    ver_pat_4 = re.compile('.*(\d+\.\d+\..*)')
 
     version_found_1 = ver_pat_1.findall(version_raw)
     version_found_2 = ver_pat_2.findall(version_raw)
     version_found_3 = ver_pat_3.findall(version_raw)
+    version_found_4 = ver_pat_4.findall(version_raw)
 
     version = ''
  

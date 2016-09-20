@@ -64,7 +64,7 @@ def startApe(directory_name):
         #Get OpenHub Tag
         tag = getProject(package_name)    
         uploads.update_one({'_id': each_id}, {'$set': {'project_tag': tag}})
-        #print("Tag generation completed")
+        print("Tag generation completed")
  
         # OpenHub Tag generation & Information extraction
       
@@ -96,9 +96,9 @@ def startApe(directory_name):
         product(uid, package_name)
         
     # Start Consolidation
-    # print("Consolidating Scans")
-    # start_consolidation(apedb)
-    # print("Consolidatin completed")
+    print("Consolidating Scans")
+    start_consolidation(apedb)
+    print("Consolidatin completed")
     # Generate report 
     
 if __name__ == '__main__':

@@ -172,15 +172,19 @@ def parse_project(elementTree):
 
     project_name = elementTree.find("result/project/name").text
     project_id = elementTree.find("result/project/id").text
+    if elementTree.find("result/project/tags"):
+        for node in elementTree.find("result/project/tags"):
+            tags.append(node.text.strip())
+    if elementTree.find("result/project/analysis/factoids"):
+        for node in elementTree.find("result/project/analysis/factoids"):
+            facts[node.attrib['type'].strip()] = node.text.strip()
+    if elementTree.find("result/project/analysis/languages"):
+        for node in elementTree.find("result/project/analysis/languages"):
+            languages[node.text.strip()] = node.attrib['percentage'].strip()
+    logo = ''
+    if elementTree.find("result/project/small_logo_url"): 
+        logo = elementTree.find("result/project/small_logo_url").text
     
-    for node in elementTree.find("result/project/tags"):
-        tags.append(node.text.strip())
-    for node in elementTree.find("result/project/analysis/factoids"):
-        facts[node.attrib['type'].strip()] = node.text.strip()
-    for node in elementTree.find("result/project/analysis/languages"):
-        languages[node.text.strip()] = node.attrib['percentage'].strip()
-    
-    logo = elementTree.find("result/project/small_logo_url").text
     loc = elementTree.find("result/project/analysis/total_code_lines").text
     commitcount = elementTree.find("result/project/analysis/total_commit_count").text
     main_lang = elementTree.find("result/project/analysis/main_language_name").text

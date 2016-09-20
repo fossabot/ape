@@ -12,6 +12,7 @@ def drop_consolidation(apepackage):
 
 def start_consolidation(apedb):
     apepackage = apedb.apepackage
+    apepackage.drop()
 
     uploads = apedb.uploads
     openhub = apedb.openhub
@@ -30,7 +31,7 @@ def start_consolidation(apedb):
         grepbugs_details_data = get_gb_details_data(grepbugs_details, upload_id)
         nvd_match_data = get_nvd_match_data(nvd_match, upload_id)
 
-
+        
 
         if nvd_match_data['nvd_cwe_count'] == 0:
             nvd_match_data['nvd_cwe_count'] = 1
@@ -43,36 +44,22 @@ def start_consolidation(apedb):
             grepbugs_result_data['regex_categories_count'] = 1
         signature_density = float(grepbugs_details_data['total_code']) / float(grepbugs_result_data['regex_categories_count'])
         grepbugs_result_data['signature_density'] = signature_density
-
-
-        apepackage.insert_one({         'upload_id': upload_id,
-                                    'community_rating': openhub_data['rating'],
-                                    'ohloh_loc': openhub_data['loc'],
-                                    'project_name': openhub_data['project_name'],
-                                    'ohloh_project_rating': openhub_data['rating'],
-                                    'ohloh_languages': openhub_data['languages_count'],
-                                    'ohloh_commits': openhub_data['commitcount'],
-                                    'intrinsic_cwe_density': flawfinder_data['intrinsic_cwe_density'],
-                                    'intrinsic_files' : flawfinder_data['affected_files_count'],
-                                    'intrinsic_cwe_count': flawfinder_data['cwe_count'],
-                                    'instrinsic_sig_density': grepbugs_result_data['signature_density'],
-                                    'intrinsic_sig_categories': grepbugs_result_data['regex_categories_count'],
-                                    'intrinsic_total_code': grepbugs_details_data['total_code'],
-                                    'intrinsic_sig_hits': grepbugs_details_data['bug_hits'],
-                                    'extrinsic_cve_count': nvd_match_data['nvd_cve_count'],
-                                    'extrinsic_cve_latest': nvd_match_data['latest_year'],
-                                    'extrinsic_cve_count': nvd_match_data['nvd_cve_count'],
-                                    'extrinsic_cvss_min': nvd_match_data['nvd_cvss_min'],
-                                    'extrinsic_cvss_max': nvd_match_data['nvd_cvss_max'],
-                                    'extrinsic_cvss_avg': nvd_match_data['nvd_cvss_avg'],
-                                    'extrinsic_cwe_density': nvd_match_data['nvd_cwe_density'],
-                                    'extrinsic_exploits': nvd_match_data['nvd_exploits'],
-                                    'extrinsic_cwe_count': nvd_match_data['nvd_cwe_count'],
-                                    'extrinsic_nvd_matches': nvd_match_data['nvd_match_count']
-                                   
-                 })
-
-
+      
+        apeid = apepackage.insert_one({'upload_id': upload_id}).inserted_id
+        for key in flawfinder_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: flawfinder_data[key]}})
+          
+        for key in openhub_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key : openhub_data[key]}})
+        for key in grepbugs_details_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: grepbugs_details_data}})
+        for key in grepbugs_result_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: grepbugs_result_data[key]}})
+    
+        for key in nvd_match_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: nvd_match_data[key]}})
+       
+        
     sys.stdout.write("[+] Done\n")
    
 def get_openhub_data(openhub, openhub_id):
@@ -89,16 +76,21 @@ def get_openhub_data(openhub, openhub_id):
 def get_flawfinder_data(flawfinder, upload_id):
     flawfinder_data = {}
     cwe_prefreq = []
+    cwe_category = []
     flawfinder_data['affected_files_count'] = flawfinder.find({'upload_id': upload_id}).count()
     cwe_count = 0
     for each_file in flawfinder.find({'upload_id': upload_id}):
         cwe_count += len(each_file['WeaknessID'])
         for each_cweid in each_file['WeaknessID']:
             cwe_prefreq.append(each_cweid)
+        cwe_category.append(each_file['Category'].strip('()'))
     flawfinder_data['cwe_count'] = cwe_count
 
     for key in Counter(cwe_prefreq):
         flawfinder_data[key] = Counter(cwe_prefreq)[key]
+   
+    for key in Counter(cwe_category):
+        flawfinder_data[key] = Counter(cwe_category)[key]
     
     return flawfinder_data
 
@@ -186,5 +178,5 @@ if  __name__ == '__main__':
     client = MongoClient()
     apedb = client.apedb
     apepackage = apedb.apepackage
-    drop_consolidation(apepackage)
+    #drop_consolidation(apepackage)
     start_consolidation(apedb)
