@@ -62,7 +62,7 @@ def minify(package, product):
     elif version_found_3:
         version = version_found_3[0]
     elif version_found_4:
-        version = version_foun_4[0]
+        version = version_found_4[0]
     else:
         version = ''
 
@@ -79,12 +79,14 @@ def getCPE(productname, version):
     cve_cpe = vFeed.cve_cpe
     nvd_db = vFeed.nvd_db
     regexpattern = "cpe:/.*"+productname+".*:.*"+version
+    regexpattern = regexpattern.replace(':git', '') 
+    print regexpattern
     cve_cpe_cur = cve_cpe.find({'cpeid': {'$regex': regexpattern}}, {'_id':0, 'cpeid':1, 'cveid':1})
     cve_cpes = []
     for each_finding in cve_cpe_cur:
         each_finding['cvss_base'] = nvd_db.find_one({'cveid': each_finding['cveid']}, {'_id':0, 'cvss_base':1})['cvss_base']
         cve_cpes.append(each_finding)
-        
+    print cve_cpes 
     return cve_cpes
 
 

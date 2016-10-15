@@ -1,9 +1,10 @@
-from __future__ import division
 import os
 import sys
 import re
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from collections import Counter
+
 
 def drop_consolidation(apepackage):
     apepackage.drop()
@@ -11,6 +12,8 @@ def drop_consolidation(apepackage):
 
 def start_consolidation(apedb):
     apepackage = apedb.apepackage
+    apepackage.drop()
+
     uploads = apedb.uploads
     openhub = apedb.openhub
     flawfinder = apedb.flawfinder
@@ -28,101 +31,35 @@ def start_consolidation(apedb):
         grepbugs_details_data = get_gb_details_data(grepbugs_details, upload_id)
         nvd_match_data = get_nvd_match_data(nvd_match, upload_id)
 
+        
+
         if nvd_match_data['nvd_cwe_count'] == 0:
             nvd_match_data['nvd_cwe_count'] = 1
         if grepbugs_details_data['total_code'] == 0:
             grepbugs_details_data['total_code'] = 1
-       
-        if nvd_match_data['nvd_cve_count'] > 1:
-            nvd_match_data['nvd_cve_discoverability'] = True
-        else:
-            nvd_match_data['nvd_cve_discoverability'] = False
-
-        #nvd_match_data['nvd_cve_density'] = nvd_match_data['nvd_cve_count']
-        #print flawfinder_data['cwe_count']
-        #print flawfinder_data['cwe_categories']
-        #flawfinder_data['intrinsic_cwe_density'] = float(flawfinder_data['cwe_count']) / float(grepbugs_details_data['total_code'])
-
-
+        
+        nvd_match_data['nvd_cwe_density'] = float(nvd_match_data['nvd_cwe_count']) / float(grepbugs_details_data['total_code'])
+        flawfinder_data['intrinsic_cwe_density'] = float(flawfinder_data['cwe_count']) / float(grepbugs_details_data['total_code'])
         if grepbugs_result_data['regex_categories_count'] == 0:
             grepbugs_result_data['regex_categories_count'] = 1
-
-        # Signature for C/C++ - 42 
-        signature_percentage = (float(grepbugs_result_data['regex_categories_count'])/42)*100
-        
-        signature_density = (grepbugs_details_data['total_files'] / grepbugs_details_data['fq_files'])*100
-        #print grepbugs_result_data
-        #print grepbugs_details_data
-        # 28 Categories for C & C++ 
-        cwe_percentage = (len(flawfinder_data['cwe_categories'])/28)*100
-       
-        cwe_density = (flawfinder_data['affected_files_count']/ grepbugs_details_data['fq_files'])*100
-        #print nvd_match_data
-        #sys.exit(0)
-
-        if not cwe_percentage:
-            cwe_percentage = 1
-        if not signature_percentage:
-            signature_percentage = 1
-       
-        if not nvd_match_data['nvd_cvss_max']:
-            nvd_match_data['nvd_cvss_max'] = 1
-
-        exploits_count = 0
-        if not nvd_match_data['nvd_exploits']:
-            exploits_count = 0
-        else:
-            exploits_count = nvd_match_data['nvd_exploits']
-        
-        #print(intrinsic_cwe_density)
-        #print(signature_density)
-        #print(nvd_match_data['nvd_cvss_max'])
-        #print(openhub_data['rating'])
- 
-        if not openhub_data['rating']:
-            openhub_data['rating'] = 1
-
-        '''
-        weakness_weight = 0.2 * cwe_percentatge
-        signature_weight = 0.1 * signature_density
-        cve_weight = 0.5 * nvd_match_data['nvd_cve_density']
-        cvss_weight = 0.2 * nvd_match_data['nvd_cvss_max']
-       
-        #print weakness_weight
-        #print signature_weight
-        #print cve_weight
-        #print cvss_weight
-        #print openhub_data['rating']
-
-        health = 0
-        health += float(openhub_data['rating'])
-        health+= float(weakness_weight)
-        health += float(signature_weight)
-        health+= float(cve_weight)
-        health+= float(cvss_weight) 
-        '''
-        exploitable = ''
+        signature_density = float(grepbugs_details_data['total_code']) / float(grepbugs_result_data['regex_categories_count'])
+        grepbugs_result_data['signature_density'] = signature_density
       
-        if exploits_count > 1:
-            exploitable = True
-        else:
-            exploitable = False
+        apeid = apepackage.insert_one({'upload_id': upload_id}).inserted_id
+        for key in flawfinder_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: flawfinder_data[key]}})
+          
+        for key in openhub_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key : openhub_data[key]}})
+        for key in grepbugs_details_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: grepbugs_details_data}})
+        for key in grepbugs_result_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: grepbugs_result_data[key]}})
     
-        community = (float(openhub_data['rating']) / 5.0 ) * 100
-
-        apepackage.insert_one({ 'upload_id': upload_id,
- 				'exploitable': exploitable,
-                                'community_rating': community,
-                                'project_name': openhub_data['project_name'],
-                                'weakness_percentage': cwe_percentage,
-                                'weakness_density' : cwe_density,
-                                'signature_percentage': signature_percentage,
-                                'signature_density': signature_density,
-                                'extrinsic_cvss_max': nvd_match_data['nvd_cvss_max']* 10,
-                                'cve_discoverability': nvd_match_data['nvd_cve_discoverability'],
-                       	     })
-
-
+        for key in nvd_match_data:
+            apepackage.update_one({'_id': apeid}, {'$set': {key: nvd_match_data[key]}})
+       
+        
     sys.stdout.write("[+] Done\n")
    
 def get_openhub_data(openhub, openhub_id):
@@ -138,15 +75,23 @@ def get_openhub_data(openhub, openhub_id):
 
 def get_flawfinder_data(flawfinder, upload_id):
     flawfinder_data = {}
+    cwe_prefreq = []
+    cwe_category = []
     flawfinder_data['affected_files_count'] = flawfinder.find({'upload_id': upload_id}).count()
     cwe_count = 0
-    total_cwes = []
     for each_file in flawfinder.find({'upload_id': upload_id}):
-        for each_id in each_file['WeaknessID']:
-            total_cwes.append(each_id)
         cwe_count += len(each_file['WeaknessID'])
+        for each_cweid in each_file['WeaknessID']:
+            cwe_prefreq.append(each_cweid)
+        cwe_category.append(each_file['Category'].strip('()'))
     flawfinder_data['cwe_count'] = cwe_count
-    flawfinder_data['cwe_categories'] = list(set(total_cwes))
+    '''
+    for key in Counter(cwe_prefreq):
+        flawfinder_data[key] = Counter(cwe_prefreq)[key]
+   
+    for key in Counter(cwe_category):
+        flawfinder_data[key] = Counter(cwe_category)[key]
+    '''
     return flawfinder_data
 
 def get_gb_results_data(grepbugs_result, upload_id):
@@ -164,10 +109,8 @@ def get_gb_details_data(grepbugs_details, upload_id):
         total_code += each_hit['nCode']
         total_files.append(each_hit['file'])
     total_files = list(set(total_files))
-    fq_files = total_files
     gb_details_data['total_code'] = total_code
     gb_details_data['total_files'] = len(total_files)
-    gb_details_data['fq_files'] = len(fq_files)
     return gb_details_data
 
 
@@ -205,7 +148,8 @@ def get_nvd_match_data(nvd_match, upload_id):
         nvd_cve_count.append(each_match['cveid'])
         nvd_cvss_store.append(each_match['cvss_base'])
 
-    nvd_match_data['nvd_exploits'] = get_exploits(nvd_cve_count)  
+    nvd_match_data['nvd_exploits'] = get_exploits(nvd_cve_count)
+  
     nvd_match_data['nvd_cpe_count'] = len(list(set(nvd_cpe_count)))
     nvd_match_data['latest_year'] = latest_cve(list(set(nvd_cve_count)))
     nvd_match_data['nvd_cve_count'] = len(list(set(nvd_cve_count)))
@@ -227,12 +171,12 @@ def get_nvd_match_data(nvd_match, upload_id):
         nvd_match_data['nvd_cvss_avg'] = sum_cvss/len(nvd_cvss_store)
     else:
         nvd_match_data['nvd_cvss_avg'] = sum_cvss/1
-    #print nvd_match_data 
+        
     return nvd_match_data
 
 if  __name__ == '__main__':
     client = MongoClient()
     apedb = client.apedb
     apepackage = apedb.apepackage
-    drop_consolidation(apepackage)
+    #drop_consolidation(apepackage)
     start_consolidation(apedb)

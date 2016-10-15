@@ -169,35 +169,47 @@ def parse_project(elementTree):
     review_count = ''
     project_id = ''
     project_name = ''
-
-    project_name = elementTree.find("result/project/name").text
-    project_id = elementTree.find("result/project/id").text
-    if elementTree.find("result/project/tags"):
+    
+    if elementTree.find("result/project/name") is not None:
+        project_name = elementTree.find("result/project/name").text
+    if elementTree.find("result/project/id") is not None:
+        project_id = elementTree.find("result/project/id").text
+    if elementTree.find("result/project/tags") is not None:
         for node in elementTree.find("result/project/tags"):
             tags.append(node.text.strip())
-    if elementTree.find("result/project/analysis/factoids"):
+    if elementTree.find("result/project/analysis/factoids") is not None:
         for node in elementTree.find("result/project/analysis/factoids"):
             facts[node.attrib['type'].strip()] = node.text.strip()
-    if elementTree.find("result/project/analysis/languages"):
+    if elementTree.find("result/project/analysis/languages") is not None:
         for node in elementTree.find("result/project/analysis/languages"):
             languages[node.text.strip()] = node.attrib['percentage'].strip()
     logo = ''
-    if elementTree.find("result/project/small_logo_url"): 
+    if elementTree.find("result/project/small_logo_url") is not None:
+        #print elementTree.find("result/project/small_logo_url") 
         logo = elementTree.find("result/project/small_logo_url").text
-    
-    loc = elementTree.find("result/project/analysis/total_code_lines").text
-    commitcount = elementTree.find("result/project/analysis/total_commit_count").text
-    main_lang = elementTree.find("result/project/analysis/main_language_name").text
-    
-    for node in elementTree.find("result/project/project_activity_index"):
-        activity_index[node.tag] = node.text
-    description = elementTree.find("result/project/description").text
-    url = elementTree.find("result/project/url").text
-    updated_at = elementTree.find("result/project/updated_at").text
-    created_at = elementTree.find("result/project/created_at").text
-    rating = elementTree.find("result/project/average_rating").text
-    rating_count = elementTree.find("result/project/rating_count").text
-    review_count = elementTree.find("result/project/review_count").text
+    if elementTree.find("result/project/analysis/total_code_lines") is not None: 
+        loc = elementTree.find("result/project/analysis/total_code_lines").text
+    if elementTree.find("result/project/analysis/total_commit_count") is not None:
+        commitcount = elementTree.find("result/project/analysis/total_commit_count").text
+    if elementTree.find("result/project/analysis/main_language_name") is not None:
+        main_lang = elementTree.find("result/project/analysis/main_language_name").text
+    if elementTree.find("result/project/project_activity_index"): 
+        for node in elementTree.find("result/project/project_activity_index"):
+            activity_index[node.tag] = node.text
+    if elementTree.find("result/project/description") is not None:
+        description = elementTree.find("result/project/description").text
+    if elementTree.find("result/project/url") is not None:
+        url = elementTree.find("result/project/url").text
+    if elementTree.find("result/project/updated_at") is not None:
+        updated_at = elementTree.find("result/project/updated_at").text
+    if elementTree.find("result/project/created_at") is not None:
+        created_at = elementTree.find("result/project/created_at").text
+    if elementTree.find("result/project/average_rating") is not None:
+        rating = elementTree.find("result/project/average_rating").text
+    if elementTree.find("result/project/rating_count") is not None:
+        rating_count = elementTree.find("result/project/rating_count").text
+    if elementTree.find("result/project/review_count") is not None:
+        review_count = elementTree.find("result/project/review_count").text
 
     openhubData['project_id'] = project_id
     openhubData['project_name'] = project_name

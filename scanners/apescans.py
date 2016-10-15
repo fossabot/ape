@@ -53,18 +53,20 @@ def startApe(directory_name):
         uid = uploads.insert_one({'name':file_name}).inserted_id
         package_ids.append(uid)
     for each_id in package_ids:
+        print each_id
         # Fetch Uploads
         package_name = uploads.find_one({'_id': each_id}, {'_id':0, 'name':1})['name']
         print("Scanning {0} with ID: {1}".format(package_name,each_id))
+        
 
         # FlawFinderScan
         create_temporary_copy(each_id, package_name)
-        print("Flawfinder completed")
+        #print("Flawfinder completed")
 
         #Get OpenHub Tag
         tag = getProject(package_name)    
         uploads.update_one({'_id': each_id}, {'$set': {'project_tag': tag}})
-        print("Tag generation completed")
+        #print("Tag generation completed")
  
         # OpenHub Tag generation & Information extraction
       
@@ -85,21 +87,25 @@ def startApe(directory_name):
         openhub_id = insert_into_database(openhubData, each_id)
         uploads.update_one({'_id': each_id}, {'$set': {'openhub_id': openhub_id}})
         
-        print("OpenHub information fetch completed")
+        #print("OpenHub information fetch completed")
 
         # GrepBugs - Signature scanning
         grepbugsHelper(each_id, package_name)
-        print("grepping bugs")
+        #print("grepping bugs")
 
         # CPE Searches 
-        print("Finding NVD Matches - CPE, CVE, CWE, CVSS Score")
-        product(uid, package_name)
-        
+        #print("Finding NVD Matches - CPE, CVE, CWE, CVSS Score")
+        print(each_id)
+        print(package_name)
+        product(each_id, package_name)
+    
+    
     # Start Consolidation
     print("Consolidating Scans")
     start_consolidation(apedb)
     print("Consolidatin completed")
     # Generate report 
+    
     
 if __name__ == '__main__':
     dir_name = ''
