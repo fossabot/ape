@@ -49,10 +49,8 @@ def start_consolidation(apedb):
 
         # Signature for C/C++ - 42 
         signature_percentage = (float(grepbugs_result_data['regex_categories_count'])/42)*100
-        
-        signature_density = (grepbugs_details_data['total_files'] / grepbugs_details_data['fq_files'])*100
-        #print grepbugs_result_data
-        #print grepbugs_details_data
+        signature_density = grepbugs_details_data['bug_hits']/grepbugs_details_data['total_code']
+      
         # 28 Categories for C & C++ 
         cwe_percentage = (len(flawfinder_data['cwe_categories'])/28)*100
        
