@@ -1,0 +1,6 @@
+name,project_name,cve_discoverability,signature_density,extrinsic_cvss_max,exploitable,weakness_density,community_rating,signature_percentage,weakness_percentage
+mongo-r3.2.0-rc3,Mongo - Sharepoint Lists Structure And Data Replicator,FALSE,0.005294576,10,FALSE,6.731184654,20,64.28571429,17.85714286
+mongo-r3.2.0-rc5,Mongo - Sharepoint Lists Structure And Data Replicator,FALSE,0.005296743,10,FALSE,6.709155112,20,64.28571429,17.85714286
+mongo-r3.2.5,Mongo - Sharepoint Lists Structure And Data Replicator,FALSE,0.005367743,10,FALSE,6.594940867,20,71.42857143,17.85714286
+mongo-r3.2.6,Mongo - Sharepoint Lists Structure And Data Replicator,FALSE,0.005361184,10,FALSE,6.599276792,20,71.42857143,17.85714286
+mongo-r3.3.12,Mongo - Sharepoint Lists Structure And Data Replicator,FALSE,0.005468525,10,FALSE,5.10020555,20,80.95238095,17.85714286

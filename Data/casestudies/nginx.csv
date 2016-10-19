@@ -1,0 +1,8 @@
+name,project_name,cve_discoverability,signature_density,extrinsic_cvss_max,exploitable,weakness_density,community_rating,signature_percentage,weakness_percentage
+nginx-release-1.0.11,nginx,TRUE,0.0028179,75,FALSE,50.33112583,93.0538,16.66666667,10.71428571
+nginx-release-1.2.5,nginx,FALSE,0.002703921,58,FALSE,51.63398693,93.0538,16.66666667,10.71428571
+nginx-release-1.5.13,nginx,FALSE,0.002514008,43,FALSE,55.79937304,93.0538,16.66666667,10.71428571
+nginx-release-1.6.1,nginx,FALSE,0.0025128,43,FALSE,55.79937304,93.0538,16.66666667,10.71428571
+nginx-release-1.7.11,nginx,FALSE,0.002405123,10,FALSE,57.41324921,93.0538,16.66666667,10.71428571
+nginx-release-1.8.1,nginx,FALSE,0.002399152,10,FALSE,57.41324921,93.0538,16.66666667,10.71428571
+nginx-release-1.9.4,nginx,TRUE,0.002410569,75,FALSE,55.58912387,93.0538,16.66666667,10.71428571

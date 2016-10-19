@@ -1,7 +1,5 @@
 *.pyc
 *.jar
-*.csv
-*.xls
 __pycache__/
 *.json
 *.xml

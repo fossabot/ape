@@ -1,0 +1,4 @@
+name,project_name,cve_discoverability,signature_density,extrinsic_cvss_max,exploitable,weakness_density,community_rating,signature_percentage,weakness_percentage
+libdash-2.0,libdash,FALSE,0.009252841,10,FALSE,3.583061889,100,7.142857143,10.71428571
+libdash-2.1,libdash,FALSE,0.009898775,10,FALSE,3.107344633,100,7.142857143,10.71428571
+libdash-2.2,libdash,FALSE,0.010253527,10,FALSE,2.872062663,100,7.142857143,10.71428571

@@ -1,0 +1,7 @@
+name,project_name,cve_discoverability,signature_density,extrinsic_cvss_max,exploitable,weakness_density,community_rating,signature_percentage,weakness_percentage
+postgres-REL8_2_14,PostgreSQL Database Server,TRUE,0.003579745,85,FALSE,16.51073198,92.724,38.0952381,17.85714286
+postgres-REL8_2_23,PostgreSQL Database Server,FALSE,0.003555236,10,FALSE,16.48351648,92.724,38.0952381,17.85714286
+postgres-REL8_3_BETA3,PostgreSQL Database Server,FALSE,0.003478833,10,FALSE,16.11253197,92.724,38.0952381,17.85714286
+postgres-REL9_1_ALPHA2,PostgreSQL Database Server,FALSE,0.00343641,10,FALSE,15.19925857,92.724,38.0952381,17.85714286
+postgres-REL9_2_2,PostgreSQL Database Server,TRUE,0.003347168,100,FALSE,15.12463033,92.724,38.0952381,17.85714286
+postgres-REL9_3_11,PostgreSQL Database Server,FALSE,0.003288018,10,FALSE,15.44715447,92.724,38.0952381,17.85714286

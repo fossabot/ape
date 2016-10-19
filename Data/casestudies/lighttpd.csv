@@ -1,0 +1,9 @@
+name,project_name,cve_discoverability,signature_density,extrinsic_cvss_max,exploitable,weakness_density,community_rating,signature_percentage,weakness_percentage
+lighttpd1.4-lighttpd-1.4.24,lighttpd,FALSE,0.004794726,10,FALSE,15.38461538,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.27,lighttpd,FALSE,0.004902073,10,FALSE,14.95327103,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.30,lighttpd,FALSE,0.004857344,10,FALSE,14.95327103,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.33,lighttpd,FALSE,0.004874746,10,FALSE,15.74074074,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.34,lighttpd,FALSE,0.004859152,10,FALSE,15.66820276,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.38,lighttpd,FALSE,0.004917744,10,FALSE,15.24663677,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.40,lighttpd,FALSE,0.00473914,10,FALSE,18.34061135,20,33.33333333,14.28571429
+lighttpd1.4-lighttpd-1.4.41,lighttpd,FALSE,0.004735808,10,FALSE,18.77729258,20,33.33333333,14.28571429
